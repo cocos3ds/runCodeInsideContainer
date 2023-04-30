@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Run Go Code</title>
+    <style>
+        .lds-spinner {
+  color: official;
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-spinner div {
+  transform-origin: 40px 40px;
+  animation: lds-spinner 1.2s linear infinite;
+}
+.lds-spinner div:after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 3px;
+  left: 37px;
+  width: 6px;
+  height: 18px;
+  border-radius: 20%;
+  background: #fff;
+}
+.lds-spinner div:nth-child(1) {
+  transform: rotate(0deg);
+  animation-delay: -1.1s;
+}
+.lds-spinner div:nth-child(2) {
+  transform: rotate(30deg);
+  animation-delay: -1s;
+}
+.lds-spinner div:nth-child(3) {
+  transform: rotate(60deg);
+  animation-delay: -0.9s;
+}
+.lds-spinner div:nth-child(4) {
+  transform: rotate(90deg);
+  animation-delay: -0.8s;
+}
+.lds-spinner div:nth-child(5) {
+  transform: rotate(120deg);
+  animation-delay: -0.7s;
+}
+.lds-spinner div:nth-child(6) {
+  transform: rotate(150deg);
+  animation-delay: -0.6s;
+}
+.lds-spinner div:nth-child(7) {
+  transform: rotate(180deg);
+  animation-delay: -0.5s;
+}
+.lds-spinner div:nth-child(8) {
+  transform: rotate(210deg);
+  animation-delay: -0.4s;
+}
+.lds-spinner div:nth-child(9) {
+  transform: rotate(240deg);
+  animation-delay: -0.3s;
+}
+.lds-spinner div:nth-child(10) {
+  transform: rotate(270deg);
+  animation-delay: -0.2s;
+}
+.lds-spinner div:nth-child(11) {
+  transform: rotate(300deg);
+  animation-delay: -0.1s;
+}
+.lds-spinner div:nth-child(12) {
+  transform: rotate(330deg);
+  animation-delay: 0s;
+}
+@keyframes lds-spinner {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+    </style>
+</head>
+<body>
+
+<div class="workspace">
+        <textarea id="go-code" rows="20" cols="100">
+package main
+import "fmt"   
+func main() {
+    fmt.Println("Hello, world!") 
+}
+        </textarea><br>
+        
+        <div id="loading" style="display:none">
+            运行中
+        </div>
+        <div id="result_area">
+            
+        </div>
+        <button id="run-btn">运行</button>
+</div>
+
+
+    <script>
+        let resultDom = document.getElementById("result_area");
+        document.getElementById("run-btn").addEventListener("click", function(event) {
+            event.preventDefault();
+            resultDom.innerHTML = '';
+            startLoding();
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/runcode");
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+                    resultDom.innerHTML = xhr.responseText
+                } else {
+                console.log("Request failed with status: ", xhr.status);
+                }
+                hideLoding();
+            };
+            xhr.onerror = function() {
+                hideLoding();
+                console.log("Request failed");
+            };
+            var code = document.getElementById("go-code").value;
+            xhr.send(JSON.stringify({ Code: code }));
+        });
+        let lodingDom =  document.getElementById("loading");
+        let dotNum = 0;
+        let intervalId = 0;
+        function showLoding(){
+            let text =  lodingDom.innerText;
+            text += '.';
+            lodingDom.innerText = text;
+            dotNum++;
+            if(dotNum>=10){
+                dotNum = 0;
+                lodingDom.innerText= "运行中";
+            }
+            
+        }
+        function startLoding(){
+            lodingDom.style.display= "block";
+            intervalId = setInterval(showLoding,500)
+        }
+        function hideLoding(){
+            lodingDom.style.display = "none";
+            lodingDom.innerText = "运行中"
+             clearInterval(intervalId)
+        }
+    </script>
+</body>
+</html>
